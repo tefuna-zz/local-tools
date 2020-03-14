@@ -9,7 +9,7 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-import const
+import const as c
 
 # ロガー設定
 logging.basicConfig(
@@ -22,10 +22,10 @@ log.setLevel(INFO)
 
 
 class NanacoGift:
-    
-    def __init__(self, numuber: str, cardno: str, url: str):
 
-        if not url.startswith("https"):
+    def __init__(self, number: str, cardno: str, url: str):
+
+        if not url.startswith(c.PREFIX_URL):
             raise ValueError("unexpected url: %s", url)
 
         self.__nanaco_number = number
@@ -42,7 +42,7 @@ class NanacoGift:
 
         try:
             # ログイン
-            self.__driver.get(url)
+            self.__driver.get(self.__url)
             self.__driver.implicitly_wait(3)
             self.__driver.find_element_by_id(
                 'nanacoNumber02').send_keys(self.__nanaco_number)
@@ -90,16 +90,15 @@ class DuplicateException(Exception):
     pass
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     # 前提チェック
-    urlspath = os.path.dirname(__file__) + "/" + const.GIFT_URLS
-    if not os.path.exists(urlspath):
+    if not os.path.exists(c.PATH_URLS):
         raise Exception("file not found.")
 
     # ログイン情報
-    number = os.environ[const.NANACO_NUMBER_KEY]
-    cardno = os.environ[const.NANACO_CARDNO_KEY]
+    number = os.environ[c.NANACO_NUMBER_KEY]
+    cardno = os.environ[c.NANACO_CARDNO_KEY]
 
     # 結果
     results = {
@@ -109,7 +108,7 @@ if __name__ == "__main__":
     }
 
     # ギフト読み込み＋ギフト登録
-    with open(urlspath, 'r', encoding='utf-8') as f:
+    with open(c.PATH_URLS, 'r', encoding='utf-8') as f:
         urls = f.readlines()
         for url in urls:
             try:
@@ -124,9 +123,14 @@ if __name__ == "__main__":
             else:
                 results["success"].append(url)
 
+    # 結果出力
     log.info("PROCESS COUNT: success=%s, duplicate=%s, failure=%s",
              len(results["success"]),
              len(results["duplicate"]),
              len(results["failure"]))
-    log.info("URL duplicate: %s", results["duplicate"])
-    log.info("URL failure: %s", results["failure"])
+    log.info("RESULT duplicate: %s", results["duplicate"])
+    log.info("RESULT failure: %s", results["failure"])
+
+
+if __name__ == "__main__":
+    main()

@@ -3,7 +3,7 @@ import os
 import sys
 from logging import DEBUG, INFO, getLogger
 
-import const
+import const as c
 
 # ロガー設定
 logging.basicConfig(
@@ -15,15 +15,8 @@ log = getLogger(__name__)
 log.setLevel(INFO)
 
 
-# グローバル
-mailpath = os.path.dirname(__file__) + "/" + const.GIFT_MAIL
-urlspath = os.path.dirname(__file__) + "/" + const.GIFT_URLS
-
-
 def main() -> None:
     """メイン関数。
-
-    tmp/giftmail.tmpを配置すること。
     """
 
     # nanacoギフトメール読み込み
@@ -45,13 +38,12 @@ def read_giftmail() -> list:
     urls = []   # ギフトURLリスト
 
     # nanacoギフトメールを読み込む。
-    with open(mailpath, 'r', encoding='utf-8') as f:
+    with open(c.PATH_MAIL, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
-            if line.startswith(const.PREFIX_GIFT):
-                url = line[line.find(const.PREFIX_URL):].strip()
+            if line.startswith(c.PREFIX_GIFT):
+                url = line[line.find(c.PREFIX_URL):].strip()
                 urls.append(url)
-
     return urls
 
 
@@ -63,7 +55,7 @@ def write_gifturls(urls: list) -> None:
     """
     # ギフトURLをファイル出力する。
     urls_lf = [url+'\n' for url in urls]
-    with open(urlspath, 'wt', encoding='utf-8') as f:
+    with open(c.PATH_URLS, 'wt', encoding='utf-8') as f:
         f.writelines(urls_lf)
 
 
